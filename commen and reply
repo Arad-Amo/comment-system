@@ -1,0 +1,98 @@
+import json
+users = {}
+comments = {}
+def register():
+    user_id = len(users) + 1
+    print("****Register****")
+    username = input("Username: ")
+    password = input("Password: ")
+    while True:
+        age_input = input("Age: ")
+        if age_input.isdigit():
+            age = int(age_input)
+            break
+        else:
+            print("Please enter a valid number for age.")
+    users[user_id] = {
+        "username": username,
+        "password": password,
+        "age": age
+    }
+    print(f"Registered successfully. Your ID: {user_id}")
+def login():
+    print("****Login****")
+    username = input("Username: ")
+    password = input("Password: ")
+    for user_ID, info in users.items():
+        if info["username"]==username and info["password"]==password:
+            print("Login successful.")
+            return user_ID
+    print("Invalid username or password.")
+    return None
+def add_comment(user_id, comment_id_counter):
+    if users[user_id]["age"] < 18:
+        print("You must be 18 or older to post a comment.")
+        return comment_id_counter
+    content = input("Enter your comment: ")
+    comments[comment_id_counter] = {
+        "content": content,
+        "replies": []
+    }
+    print(f"Comment posted. ID: {comment_id_counter}")
+    return comment_id_counter + 1
+def add_reply(user_id):
+    if users[user_id]["age"]<18:
+        print("You must be 18 or older to reply.")
+        return
+    if not comments:
+        print("No comments to reply to.")
+        return
+    while True:
+        cid_input = input("Enter comment ID to reply: ")
+        if cid_input.isdigit():
+            cid = int(cid_input)
+            if cid in comments:
+                break
+            else:
+                print("Comment ID not found.")
+        else:
+            print("Please enter a valid number.")
+    reply_content = input("Enter your reply: ")
+    reply_data = {
+        "name": users[user_id]["username"],
+        "content": reply_content
+    }
+    comments[cid]["replies"].append(reply_data)
+    print("Reply added.")
+def user_menu(user_id, comment_id_counter):
+    while True:
+        print("\n1. Add Comment\n2. Reply to Comment\n3. Logout")
+        choice = input("Choose an option: ").strip().lower()
+        if choice in ["1", "comment"]:
+            comment_id_counter = add_comment(user_id, comment_id_counter)
+        elif choice in ["2", "reply"]:
+            add_reply(user_id)
+        elif choice in ["3", "logout"]:
+            print("Logging out...")
+            print(json.dumps(comments, indent=4))
+            break
+        else:
+            print("Invalid choice.")
+    return comment_id_counter
+def main_menu():
+    comment_id_counter = 1
+    while True:
+        print("\n1. Register\n2. Login\n3. Exit")
+        choice = input("Choose an option: ").strip().lower()
+        if choice in ["1", "register"]:
+            register()
+        elif choice in ["2", "login"]:
+            user_id = login()
+            if user_id is not None:
+                comment_id_counter = user_menu(user_id, comment_id_counter)
+        elif choice in ["3", "exit"]:
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
+main_menu()
